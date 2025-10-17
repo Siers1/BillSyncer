@@ -23,7 +23,7 @@
 
 ### 克隆仓库
 ```bash
-git clone https://github.com/Siers1/BillSyncer.git
+git clone https://github.com/Siers1/BillSyncer_backend.git
 cd BillSyncer
 ```
 
