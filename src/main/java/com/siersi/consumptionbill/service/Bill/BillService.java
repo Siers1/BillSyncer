@@ -46,7 +46,7 @@ public interface BillService extends IService<Bill> {
      * 
      * @param billRequest 账单更新请求对象，包含待更新的账单信息
      */
-    void updateBill(BillRequest billRequest);
+    void updateBill(BillRequest billRequest, String authorization);
 
     void deleteBill(Long billId, String authorization);
 
@@ -55,4 +55,8 @@ public interface BillService extends IService<Bill> {
     List<UserVo> getBillUsers(Long billId);
 
     void deleteBillUser(Long billId, Long userId, String authorization);
+
+    void addManager(Long billId, Long userId, String authorization);
+
+    void deleteManager(Long billId, Long userId, String authorization);
 }

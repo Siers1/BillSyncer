@@ -59,7 +59,7 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
                 .where("bill_id = ?", pageParam.getParams().getBillId())
                 .and("valid = 1");
 
-        System.out.println(recordMapper.selectListByQuery(queryWrapper).toString());
+//        System.out.println(recordMapper.selectListByQuery(queryWrapper).toString());
         // 执行分页查询并返回结果
         return recordVoMapper.paginate(Page.of(pageParam.getPageNum(),pageParam.getPageSize()), queryWrapper);
     }

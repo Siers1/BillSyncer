@@ -74,8 +74,8 @@ public class BillController {
      * @return 更新结果，成功时返回成功信息
      */
     @PostMapping("/update")
-    public Result<Void> updateBill(@RequestBody @Valid BillRequest billRequest) {
-        billService.updateBill(billRequest);
+    public Result<Void> updateBill(@RequestBody @Valid BillRequest billRequest, @RequestHeader("Authorization") String authorization) {
+        billService.updateBill(billRequest, authorization);
         return Result.success("更新成功");
     }
 
@@ -94,5 +94,17 @@ public class BillController {
     public Result<Void> deleteBillUser(@RequestParam Long billId, @RequestParam Long userId, @RequestHeader("Authorization") String authorization) {
         billService.deleteBillUser(billId, userId, authorization);
         return Result.success("删除成功");
+    }
+
+    @PostMapping("/add-manager")
+    public Result<Void> addManager(@RequestParam Long billId, @RequestParam Long userId, @RequestHeader("Authorization") String authorization) {
+        billService.addManager(billId, userId, authorization);
+        return Result.success("添加成功");
+    }
+
+    @PostMapping("/delete-manager")
+    public Result<Void> deleteManager(@RequestParam Long billId, @RequestParam Long userId, @RequestHeader("Authorization") String authorization) {
+        billService.deleteManager(billId, userId, authorization);
+        return Result.success("移除成功");
     }
 }

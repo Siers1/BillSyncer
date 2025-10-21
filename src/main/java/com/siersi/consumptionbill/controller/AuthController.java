@@ -55,14 +55,14 @@ public class AuthController {
      */
     @PostMapping("/login")
     public Result<Map<String, Object>> login(@RequestBody @Valid LoginRequest loginRequest) {
-        userService.login(loginRequest); // 验证密码
+        userService.login(loginRequest);
 
         if (jwtUtil.hasActiveLogin(loginRequest.getAccount())) {
             Long originalUserId = userService.getIdByAccount(loginRequest.getAccount());
             WebSocketService.sendMessage(originalUserId, "您的账号在其他设备登录，即将自动退出");
 
             try {
-                Thread.sleep(1000); // 等待1秒
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

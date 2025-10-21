@@ -136,7 +136,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
                 .from("bill")
                 .innerJoin("user_bill").on("bill.id = user_bill.bill_id")
                 .where("user_bill.user_id = ?", userId)
-                .and("bill.valid = 1");
+                .and("bill.valid = 1 and user_bill.valid = 1");
 
         return billVoMapper.selectListByQuery(queryWrapper);
     }
@@ -179,6 +179,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
             throw new BusinessException("用户不在帐本中");
         }
 
+        //同等级之间不能相互删除, 创建者可以删除管理员, 管理员可以删除成员
         if (opUserBill.getRoleId() >= targetUserBill.getRoleId()) {
             throw new BusinessException("你的权限不足");
         }
@@ -195,7 +196,10 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      * @throws BusinessException 当账单不存在时抛出异常
      */
     @Override
-    public void updateBill(BillRequest billRequest) {
+    public void updateBill(BillRequest billRequest, String authorization) {
+        // 验证操作者权限(需要是创建者)
+        checkPermission(billRequest.getBillId(), authorization, UserBillRole.CREATOR);
+
         // 检查账单是否存在
         Bill bill = billMapper.selectOneById(billRequest.getBillId());
 
@@ -212,23 +216,78 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
 
     @Override
     public void deleteBill(Long billId, String authorization) {
-        Long userId = userService.getIdByAuthorization(authorization);
-
-        QueryWrapper queryWrapper = QueryWrapper.create()
-                .eq("user_id", userId)
-                .eq("bill_id", billId)
-                .eq("valid", 1);
-        UserBill userBill = userBillMapper.selectOneByQuery(queryWrapper);
-
-        if (userBill == null) {
-            throw new BusinessException("账本不存在或你不在此账本中");
-        }
-        if (!userBill.getRoleId().equals(UserBillRole.CREATOR.getRoleId())) {
-            throw new BusinessException("你无权删除");
-        }
+        // 验证操作者权限(需要是创建者)
+        checkPermission(billId, authorization, UserBillRole.CREATOR);
 
         Bill bill = billMapper.selectOneById(billId);
         bill.setValid(0);
         billMapper.update(bill);
+    }
+
+    @Override
+    public void addManager(Long billId, Long userId, String authorization) {
+        // 验证操作者权限(需要是创建者)
+        checkPermission(billId, authorization, UserBillRole.CREATOR);
+
+        // 更新目标用户角色
+        UserBill userBill = userBillMapper.selectOneByQuery(QueryWrapper.create()
+                .eq("user_id", userId).eq("bill_id", billId).eq("valid", 1));
+
+        if (userBill == null) {
+            throw new BusinessException("账本或用户不存在");
+        }
+        if (!userBill.getRoleId().equals(UserBillRole.MEMBER.getRoleId())) {
+            throw new BusinessException("用户已是管理员");
+        }
+
+        userBill.setRoleId(UserBillRole.MANAGER.getRoleId());
+        userBillMapper.update(userBill);
+    }
+
+    @Override
+    public void deleteManager(Long billId, Long userId, String authorization) {
+        // 验证操作者权限(需要是创建者)
+        checkPermission(billId, authorization, UserBillRole.CREATOR);
+
+        // 更新目标用户角色
+        UserBill userBill = userBillMapper.selectOneByQuery(QueryWrapper.create()
+                .eq("user_id", userId).eq("bill_id", billId).eq("valid", 1));
+
+        if (userBill == null) {
+            throw new BusinessException("账本或用户不存在");
+        }
+        if (userBill.getRoleId().equals(UserBillRole.MEMBER.getRoleId())) {
+            throw new BusinessException("用户已是成员");
+        }
+
+        userBill.setRoleId(UserBillRole.MEMBER.getRoleId());
+        userBillMapper.update(userBill);
+    }
+
+    /**
+     * 检查用户对账本的权限
+     *
+     * @param billId        账本ID
+     * @param authorization 用户授权令牌
+     * @param requiredRole  需要的角色(如果为null则只检查用户是否在账本中)
+     * @throws BusinessException 当用户权限不足或不在账本中时抛出异常
+     */
+    private void checkPermission(Long billId, String authorization, UserBillRole requiredRole) {
+        Long opUserId = userService.getIdByAuthorization(authorization);
+
+        // 查询操作者在账本中的权限
+        UserBill opUserBill = userBillMapper.selectOneByQuery(QueryWrapper.create()
+                .eq("user_id", opUserId)
+                .eq("bill_id", billId)
+                .eq("valid", 1));
+
+        if (opUserBill == null) {
+            throw new BusinessException("账本无效或你不在此账本中");
+        }
+
+        // 如果指定了需要的角色,则验证权限
+        if (requiredRole != null && !opUserBill.getRoleId().equals(requiredRole.getRoleId())) {
+            throw new BusinessException("你的权限不足");
+        }
     }
 }
