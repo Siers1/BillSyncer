@@ -95,4 +95,9 @@ public class GlobalExceptionHandler {
     public Result<Void> handleRuntimeException(Exception e) {
         return Result.failure(500, e.getMessage());
     }
+
+    @ExceptionHandler(RateLimitException.class)
+    public Result<Void> handleRateLimitException(RateLimitException e) {
+        return Result.failure(429, e.getMessage());
+    }
 }
