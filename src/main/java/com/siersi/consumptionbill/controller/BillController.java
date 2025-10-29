@@ -54,7 +54,7 @@ public class BillController {
      * @return 包含账单列表的分页结果
      */
     @PostMapping("/list")
-    @RateLimit(key = "billList", time = 20, count = 10)
+    @RateLimit(key = "billList", time = 5, count = 20)
     public Result<Page<BillVo>> getBillList(@RequestBody @Valid PageParam<Object> pageParam, @RequestHeader("Authorization") String authorization) {
         return Result.success(billService.getBills(pageParam, authorization));
     }

@@ -9,8 +9,10 @@ import com.siersi.consumptionbill.service.Invitation.InvitationService;
 import com.siersi.consumptionbill.service.Notification.NotificationService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class NotificationServiceImpl extends ServiceImpl<NotificationMapper, Notification> implements NotificationService {
 
     @Resource

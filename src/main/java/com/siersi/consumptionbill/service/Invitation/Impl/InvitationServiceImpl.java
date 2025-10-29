@@ -23,10 +23,12 @@ import com.siersi.consumptionbill.vo.InvitationVo;
 import com.siersi.consumptionbill.websocket.WebSocketService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class InvitationServiceImpl extends ServiceImpl<InvitationMapper, Invitation> implements InvitationService {
 
     @Resource

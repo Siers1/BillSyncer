@@ -16,11 +16,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @MapperScan("com.siersi.consumptionbill.mapper")
 public class ConsumptionBillApplication {
 
-	/**
-	 * 应用程序入口点
-	 * 
-	 * @param args 命令行参数
-	 */
 	public static void main(String[] args) {
 		SpringApplication.run(ConsumptionBillApplication.class, args);
 	}

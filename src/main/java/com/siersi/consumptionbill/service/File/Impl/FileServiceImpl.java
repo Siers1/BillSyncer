@@ -5,6 +5,7 @@ import com.siersi.consumptionbill.config.OssConfig;
 import com.siersi.consumptionbill.service.File.FileService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
