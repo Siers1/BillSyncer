@@ -9,8 +9,6 @@ import com.siersi.consumptionbill.entity.Record;
 import com.siersi.consumptionbill.utils.PageParam;
 import com.siersi.consumptionbill.vo.RecordVo;
 
-import java.util.List;
-
 /**
  * 消费记录服务接口
  * 定义消费记录相关的业务操作，包括查询消费记录等功能

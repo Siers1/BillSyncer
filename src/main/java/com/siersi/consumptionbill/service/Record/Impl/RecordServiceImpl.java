@@ -1,5 +1,6 @@
 package com.siersi.consumptionbill.service.Record.Impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -48,16 +49,25 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
      */
     @Override
     public Page<RecordVo> getRecords(PageParam<RecordDTO> pageParam) {
-        // 验证账单ID不能为空
         if(pageParam.getParams().getBillId() == null){
             throw new BusinessException(400, "账本不能为空");
         }
 
-        // 构建查询条件：查询指定账单的有效消费记录
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .from("record")
                 .where("bill_id = ?", pageParam.getParams().getBillId())
                 .and("valid = 1");
+
+        if (StrUtil.isNotBlank(pageParam.getParams().getKeyWords())) {
+            String keyWords = "%" + pageParam.getParams().getKeyWords() + "%";
+            queryWrapper.and(w -> {
+                w.where("item_name LIKE ?", keyWords)
+                        .or("item_price LIKE ?", keyWords)
+                        .or("consumption_type LIKE ?", keyWords)
+                        .or("payment_method LIKE ?", keyWords)
+                        .or("comment LIKE ?", keyWords);
+            });
+        }
 
 //        System.out.println(recordMapper.selectListByQuery(queryWrapper).toString());
         // 执行分页查询并返回结果
